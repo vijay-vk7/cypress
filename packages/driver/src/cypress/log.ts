@@ -349,33 +349,64 @@ export class Log {
       next: null,
     })
 
-    const snapshot = this.cy.createSnapshot(name, this.get('$el'))
+    let snapshot
+    const postProcessSnapshot = (shouldRebindSnapshotFn = true) => {
+      const snapshots = this.get('snapshots') || []
 
-    const snapshots = this.get('snapshots') || []
-
-    // don't add snapshot if we couldn't create one, which can happen
-    // if the snapshotting process errors
-    // https://github.com/cypress-io/cypress/issues/15816
-    if (snapshot) {
+      // don't add snapshot if we couldn't create one, which can happen
+      // if the snapshotting process errors
+      // https://github.com/cypress-io/cypress/issues/15816
+      if (snapshot) {
       // insert at index 'at' or whatever is the next position
-      snapshots[options.at || snapshots.length] = snapshot
+        snapshots[options.at || snapshots.length] = snapshot
+      }
+
+      this.set('snapshots', snapshots)
+
+      if (options.next && shouldRebindSnapshotFn) {
+        const fn = this.snapshot
+
+        this.snapshot = function () {
+        // restore the fn
+          this.snapshot = fn
+
+          // call orig fn with next as name
+          return fn.call(this, options.next)
+        }
+      }
+
+      return this
     }
 
-    this.set('snapshots', snapshots)
+    if (this.config('experimentalSessionAndOrigin') && !Cypress.isCrossOriginSpecBridge) {
+      // @ts-ignore
+      const { originPolicy: activeSpecBridgeOriginPolicyIfApplicable } = this.state('currentActiveOriginPolicy') ? Cypress.Location.create(this.state('currentActiveOriginPolicy')) : {
+        originPolicy: undefined,
+      }
+      // @ts-ignore
+      const { originPolicy: originPolicyThatIsSoonToBeOrIsActive } = Cypress.Location.create(this.state('anticipatingCrossOriginResponse')?.href || this.state('url'))
 
-    if (options.next) {
-      const fn = this.snapshot
+      if (activeSpecBridgeOriginPolicyIfApplicable && activeSpecBridgeOriginPolicyIfApplicable === originPolicyThatIsSoonToBeOrIsActive) {
+        // NOTE: using a combination of 'id' and date epoch to generate a unique event to prevent any type of doubling up for log requests for snapshots
+        const eventID = this.get('id') + Date.now()
 
-      this.snapshot = function () {
-        // restore the fn
-        this.snapshot = fn
+        Cypress.primaryOriginCommunicator.once(`snapshot:for:log:generated:${eventID}`, (generatedCrossOriginSnapshot) => {
+          snapshot = generatedCrossOriginSnapshot.body ? generatedCrossOriginSnapshot : null
+          postProcessSnapshot(false)
+        })
 
-        // call orig fn with next as name
-        return fn.call(this, options.next)
+        Cypress.primaryOriginCommunicator.toSpecBridge(activeSpecBridgeOriginPolicyIfApplicable, 'generate:snapshot:for:log', {
+          name,
+          id: eventID,
+        })
+
+        return this
       }
     }
 
-    return this
+    snapshot = this.cy.createSnapshot(name, this.get('$el'))
+
+    return postProcessSnapshot()
   }
 
   error (err) {

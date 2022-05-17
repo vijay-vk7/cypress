@@ -10,6 +10,7 @@ const debug = debugFn('cypress:driver:multi-origin')
 const CROSS_ORIGIN_PREFIX = 'cross:origin:'
 const LOG_EVENTS = [`${CROSS_ORIGIN_PREFIX}log:added`, `${CROSS_ORIGIN_PREFIX}log:changed`]
 const FINAL_SNAPSHOT_EVENT = `${CROSS_ORIGIN_PREFIX}final:snapshot:generated`
+const SNAPSHOT_EVENT_PREFIX = `${CROSS_ORIGIN_PREFIX}snapshot:for:log:generated`
 
 /**
  * Primary Origin communicator. Responsible for sending/receiving events throughout
@@ -52,6 +53,10 @@ export class PrimaryOriginCommunicator extends EventEmitter {
 
       // reify the final snapshot coming back from the secondary domain if requested by the runner.
       if (FINAL_SNAPSHOT_EVENT === data?.event) {
+        data.data = reifySnapshotFromSerialization(data.data as any)
+      }
+
+      if (data?.event.includes(SNAPSHOT_EVENT_PREFIX) && !Cypress._.isEmpty(data?.data)) {
         data.data = reifySnapshotFromSerialization(data.data as any)
       }
 
@@ -193,6 +198,11 @@ export class SpecBridgeCommunicator extends EventEmitter {
 
     // If requested by the runner, preprocess the final snapshot before sending through postMessage() to attempt to serialize the DOM body of the snapshot.
     if (FINAL_SNAPSHOT_EVENT === eventName) {
+      data = preprocessSnapshotForSerialization(data as any)
+    }
+
+    // SNAPSHOT_EVENT_PREFIX events are namespaced per primary log
+    if (eventName.includes(SNAPSHOT_EVENT_PREFIX) && !Cypress._.isEmpty(data)) {
       data = preprocessSnapshotForSerialization(data as any)
     }
 
