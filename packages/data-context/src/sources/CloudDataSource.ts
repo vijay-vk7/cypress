@@ -75,6 +75,7 @@ export interface CloudDataSourceParams {
  */
 export class CloudDataSource {
   #cloudUrqlClient: Client
+  #lastCache?: string
 
   constructor (private params: CloudDataSourceParams) {
     this.#cloudUrqlClient = this.reset()
@@ -105,6 +106,25 @@ export class CloudDataSource {
             Mutation: {
               _cloudCacheInvalidate: (parent, { args }: {args: Parameters<Cache['invalidate']>}, cache, info) => {
                 cache.invalidate(...args)
+              },
+              _showUrqlCache: (parent, { args }: {args: Parameters<Cache['invalidate']>}, cache, info) => {
+                this.#lastCache = JSON.stringify(cache, function replacer (key, value) {
+                  if (value instanceof Map) {
+                    const reducer = (obj: any, mapKey: any) => {
+                      obj[mapKey] = value.get(mapKey)
+
+                      return obj
+                    }
+
+                    return [...value.keys()].sort().reduce(reducer, {})
+                  }
+
+                  if (value instanceof Set) {
+                    return [...value].sort()
+                  }
+
+                  return value
+                })
               },
             },
           },
@@ -280,5 +300,22 @@ export class CloudDataSource {
         },
       },
     }).toPromise()
+  }
+
+  async getCache () {
+    await this.#cloudUrqlClient.mutation(`
+      mutation Internal_showUrqlCache { 
+        _showUrqlCache
+      }
+    `, { }, {
+      fetchOptions: {
+        headers: {
+          // TODO: replace this with an exhange to filter out this request
+          INTERNAL_REQUEST: JSON.stringify({ data: { _cloudCacheInvalidate: true } }),
+        },
+      },
+    }).toPromise()
+
+    return JSON.parse(this.#lastCache ?? '')
   }
 }

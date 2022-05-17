@@ -59,7 +59,8 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
   function mountFragment<T extends TypedDocumentNode<any, any>> (source: T, options: MountFragmentConfig<T>, list: boolean = false): Cypress.Chainable<ClientTestContext> {
     let hasMounted = false
     const context = makeClientTestContext()
-    const fieldName = list ? 'testFragmentMemberList' : 'testFragmentMember'
+    const fieldName = list ? `testFragmentMemberList(count: ${(options as MountFragmentListConfig<T>).count ?? 2})` : 'testFragmentMember'
+    const fieldNameNoArg = list ? `testFragmentMemberList` : 'testFragmentMember'
 
     const mountingOptions: MountingOptions<any, any> = {
       global: {
@@ -108,7 +109,7 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
         }
 
         return {
-          gql: computed(() => result.data.value?.[fieldName]),
+          gql: computed(() => result.data.value?.[fieldNameNoArg]),
         }
       },
       render: (props) => {
@@ -182,7 +183,7 @@ type MountFragmentListConfig<T extends TypedDocumentNode<any, any>> = {
   count?: number
   variables?: VariablesOf<T>
   render: (frag: Exclude<ResultOf<T>, undefined>[]) => JSX.Element
-  onResult?: (result: ResultOf<T>, ctx: ClientTestContext) => ResultOf<T> | void
+  onResult?: (result: ResultOf<T>[], ctx: ClientTestContext) => ResultOf<T>[] | void
   expectError?: boolean
 } & CyMountOptions<unknown>
 

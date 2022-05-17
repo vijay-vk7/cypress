@@ -49,7 +49,7 @@
           :use-default-hocus="false"
         >
           <SpecRunSummary
-            :run="latestRun"
+            :gql="latestRun"
             :spec-file="props.specFile"
           />
         </ExternalLink>
@@ -99,8 +99,8 @@
 <script setup lang="ts">
 
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
-import { /*RemoteFetchableStatus,*/ RunStatusDotsFragment, RunStatusDots_RefetchDocument } from '../generated/graphql'
-import Tooltip, { InteractiveHighlightColor } from '@packages/frontend-shared/src/components/Tooltip.vue'
+import { RemoteFetchableStatus, RunStatusDotsFragment, RunStatusDots_RefetchDocument } from '../generated/graphql'
+import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import { computed, ComputedRef } from 'vue'
 import CancelledIcon from '~icons/cy/cancelled-solid_x16.svg'
 import ErroredIcon from '~icons/cy/errored-solid_x16.svg'
@@ -120,33 +120,11 @@ fragment RunStatusDots on Spec {
     status
     data {
       id
-      specRuns(first: 4, fromBranch: $fromBranch) {
+      specRuns(first: 4, fromBranch: "muaz/CLOUD-577-spec-list-display-latest-runs") {
         nodes {
           id
           # TODO: Move most of this (everything the popover needs) into a "cloudNode" query we run lazily in SpecRunSummary
-          runNumber
-          testsFailed{
-            min
-            max
-          }
-          testsPassed{
-            min
-            max
-          }
-          testsPending{
-            min
-            max
-          }
-          testsSkipped{
-            min
-            max
-          }
-          createdAt
-          groupCount
-          specDuration{
-            min
-            max
-          }
+          ...SpecRunSummary
           status
           url
         }

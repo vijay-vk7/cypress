@@ -16,6 +16,10 @@ extend type Mutation {
   Used internally to update the URQL cache in the CloudDataSource
   """
   _cloudCacheInvalidate(args: JSON): Boolean
+  """
+  Used internally to update the URQL cache in the CloudDataSource
+  """
+  _showUrqlCache(args: JSON): Boolean
 }
 `
 

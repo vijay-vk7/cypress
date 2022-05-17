@@ -1,3 +1,4 @@
+import { GraphQLDirective, GraphQLSchema } from 'graphql'
 import { objectType } from 'nexus'
 import { SpecTypeEnum } from '../enumTypes'
 import { GitInfo } from './gql-GitInfo'
@@ -51,7 +52,7 @@ export const Spec = objectType({
     t.remoteField('cloudSpec', {
       type: 'CloudProjectSpec',
       remoteQueryField: 'cloudSpecByPath',
-      shouldEagerFetch: (source, args, ctx, info, idx) => idx <= 11,
+      shouldEagerFetch: (source, args, ctx, info, idx) => true, // TODO: change to false & have client fetch
       queryArgs: async (source, args, ctx) => {
         const projectId = await ctx.project.projectId()
 

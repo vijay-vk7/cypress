@@ -24,8 +24,9 @@ import type {
   CloudRunStatus,
 } from '../src/gen/test-cloud-graphql-types.gen'
 import type { GraphQLResolveInfo } from 'graphql'
+import { exampleRuns } from './stubCloudSpecRun'
 
- type ConfigFor<T> = Omit<T, 'id' | '__typename'>
+type ConfigFor<T> = Omit<T, 'id' | '__typename'>
 
 export type CloudTypesWithId = {
   [K in keyof CodegenTypeMap]: 'id' extends keyof CodegenTypeMap[K] ? K : never
@@ -265,6 +266,10 @@ export const CloudOrganizationConnectionStubs = {
   ],
 }
 
+export const CloudSpecRun = {
+
+}
+
 export const CloudProjectStubs = {
   e2eProject: createCloudProject({
     slug: 'efgh',
@@ -326,3 +331,5 @@ export const CloudQuery: MaybeResolver<Query> = {
     return ids.map((id) => nodeRegistry[id] ?? null)
   },
 }
+
+export const CloudSpecRuns = exampleRuns()

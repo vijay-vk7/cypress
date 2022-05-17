@@ -44,7 +44,7 @@ query SpecsPageContainer_BranchInfo {
 `
 
 gql`
-query SpecsPageContainer($fromBranch: String!, $hasBranch: Boolean!) {
+query SpecsPageContainer($hasBranch: Boolean!) {
   ...Specs_SpecsList
   ...NoSpecsPage
   ...CreateSpecModal
@@ -56,7 +56,7 @@ query SpecsPageContainer($fromBranch: String!, $hasBranch: Boolean!) {
 `
 
 gql`
-subscription SpecsPageContainer_specsChange($fromBranch: String!, $hasBranch: Boolean!) {
+subscription SpecsPageContainer_specsChange($hasBranch: Boolean!) {
   specsChange {
     id
     specs {

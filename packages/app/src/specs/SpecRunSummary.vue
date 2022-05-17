@@ -1,11 +1,10 @@
 <template>
   <div
-    v-if="props.run"
     class="flex flex-col p-4 gap-2 items-center"
     :class="statusColor"
   >
     <div class="font-semibold text-gray-800">
-      Run #{{ props.run.runNumber }}
+      Run #{{ props.gql.runNumber }}
     </div>
     <div class="max-w-80 text-gray-600 truncate overflow-hidden">
       {{ props.specFile }}
@@ -24,8 +23,8 @@
         height="4px"
         class="icon-light-gray-400"
       />
-      <div v-if="props.run.createdAt">
-        {{ getTimeAgo(props.run.createdAt!) }}
+      <div v-if="props.gql.createdAt">
+        {{ getTimeAgo(props.gql.createdAt) }}
       </div>
       <i-cy-dot-solid_x4
         width="4px"
@@ -38,7 +37,7 @@
         height="4px"
         class="icon-light-gray-400"
       />
-      <div>{{ getAggDurationString(props.run.specDuration ?? {}) }}</div>
+      <div>{{ getAggDurationString(props.gql.specDuration ?? {}) }}</div>
     </div>
     <ResultCounts
       v-if="runResults"
@@ -51,15 +50,46 @@
 <script setup lang="ts">
 
 import { computed } from 'vue'
-import type { CloudSpecRun, SpecDataAggregate } from '../../../graphql/src/gen/cloud-source-types.gen'
+import type { SpecRunSummaryFragment } from '../generated/graphql'
 import ResultCounts, { ResultCountsProps } from '@packages/frontend-shared/src/components/ResultCounts.vue'
 import { getTimeAgo, getDurationString } from '@packages/frontend-shared/src/utils/time'
+import { gql } from '@urql/vue'
+import type { SpecDataAggregate } from '../../../graphql/src/gen/cloud-source-types.gen'
+
+gql`
+fragment SpecRunSummary on CloudSpecRun {
+  id
+  status
+  runNumber
+  testsFailed {
+    min
+    max
+  }
+  testsPassed {
+    min
+    max
+  }
+  testsPending {
+    min
+    max
+  }
+  testsSkipped {
+    min
+    max
+  }
+  createdAt
+  groupCount
+  specDuration {
+    min
+    max
+  }
+}
+`
 
 const props = withDefaults(defineProps<{
-  run: CloudSpecRun|null
+  gql: SpecRunSummaryFragment
   specFile: string|null
 }>(), {
-  run: null,
   specFile: null,
 })
 
@@ -82,29 +112,29 @@ const getAggDurationString = (agg: SpecDataAggregate) => {
 }
 
 const runResults = computed(() => {
-  if (!props.run) return null
+  if (!props.gql) return null
 
   return {
-    id: props.run.id,
-    totalFailed: getAggregateTestCountString(props.run.testsFailed ?? {}),
-    totalPassed: getAggregateTestCountString(props.run.testsPassed ?? {}),
-    totalPending: getAggregateTestCountString(props.run.testsPending ?? {}),
-    totalSkipped: getAggregateTestCountString(props.run.testsSkipped ?? {}),
+    id: props.gql.id,
+    totalFailed: getAggregateTestCountString(props.gql.testsFailed ?? {}),
+    totalPassed: getAggregateTestCountString(props.gql.testsPassed ?? {}),
+    totalPending: getAggregateTestCountString(props.gql.testsPending ?? {}),
+    totalSkipped: getAggregateTestCountString(props.gql.testsSkipped ?? {}),
   } as ResultCountsProps
 })
 
 const groupText = computed(() => {
-  if (!props.run) return null
+  if (!props.gql) return null
 
-  if (props.run.groupCount === 1) return '1 group'
+  if (props.gql.groupCount === 1) return '1 group'
 
-  return `${props.run.groupCount } groups`
+  return `${props.gql.groupCount } groups`
 })
 
 const statusText = computed(() => {
-  if (!props.run?.status) return null
+  if (!props.gql?.status) return null
 
-  switch (props.run.status) {
+  switch (props.gql.status) {
     case 'CANCELLED': return 'Cancelled'
     case 'ERRORED': return 'Errored'
     case 'FAILED': return 'Failed'
@@ -118,9 +148,9 @@ const statusText = computed(() => {
 })
 
 const statusColor = computed(() => {
-  if (!props.run?.status) return 'gray-700'
+  if (!props.gql?.status) return 'gray-700'
 
-  switch (props.run.status) {
+  switch (props.gql.status) {
     case 'OVERLIMIT':
     case 'ERRORED':
     case 'TIMEDOUT':
