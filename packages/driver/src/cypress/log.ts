@@ -364,14 +364,14 @@ export class Log {
       this.set('snapshots', snapshots)
 
       if (options.next && shouldRebindSnapshotFn) {
-        const fn = this.snapshot
+        const originalLogSnapshotFn = this.snapshot
 
         this.snapshot = function () {
-        // restore the fn
-          this.snapshot = fn
+        // restore the original snapshot function
+          this.snapshot = originalLogSnapshotFn
 
           // call orig fn with next as name
-          return fn.call(this, options.next)
+          return originalLogSnapshotFn.call(this, options.next)
         }
       }
 
