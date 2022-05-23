@@ -228,7 +228,7 @@ export class IframeModel {
        * The spec bridge that matches the origin policy will take a snapshot and send it back to the primary for the runner to store in originalState.
        */
       Cypress.primaryOriginCommunicator.toAllSpecBridges('generate:final:snapshot', this.state.url)
-      Cypress.primaryOriginCommunicator.once('final:snapshot:generated', (finalSnapshot) => {
+      Cypress.primaryOriginCommunicator.once('snapshot:final:generated', (finalSnapshot) => {
         this.originalState = {
           body: finalSnapshot.body,
           htmlAttrs: finalSnapshot.htmlAttrs,
