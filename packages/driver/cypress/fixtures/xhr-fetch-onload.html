@@ -6,11 +6,11 @@
       function fireXHRAndFetchRequests() {
 
         xhr = new XMLHttpRequest();
-        xhr.open("GET", "https://jsonplaceholder.cypress.io/todos/1");
+        xhr.open("GET", "http://localhost:3500/foo.bar.baz.json");
         xhr.responseType = "json";
         xhr.send();
 
-        fetch("https://jsonplaceholder.cypress.io/todos/1")
+        fetch("http://localhost:3500/foo.bar.baz.json")
       }
       fireXHRAndFetchRequests()
     </script>

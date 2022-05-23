@@ -18,6 +18,10 @@ describe('cy.origin - snapshots', () => {
       logs.set(attrs.id, log)
     })
 
+    cy.fixture('foo.bar.baz.json').then((fooBarBaz) => {
+      cy.intercept('GET', '/foo.bar.baz.json', { body: fooBarBaz })
+    })
+
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="xhr-fetch-requests"]').click()
   })
@@ -30,7 +34,7 @@ describe('cy.origin - snapshots', () => {
     })
 
     cy.shouldWithTimeout(() => {
-      const xhrLogFromSecondaryOrigin = findLog(logs, 'xhr', 'https://jsonplaceholder.cypress.io/todos/1')?.get()
+      const xhrLogFromSecondaryOrigin = findLog(logs, 'xhr', 'http://localhost:3500/foo.bar.baz.json')?.get()
 
       expect(xhrLogFromSecondaryOrigin).to.not.be.undefined
 
@@ -50,7 +54,7 @@ describe('cy.origin - snapshots', () => {
     })
 
     cy.shouldWithTimeout(() => {
-      const xhrLogFromSecondaryOrigin = findLog(logs, 'fetch', 'https://jsonplaceholder.cypress.io/todos/1')?.get()
+      const xhrLogFromSecondaryOrigin = findLog(logs, 'fetch', 'http://localhost:3500/foo.bar.baz.json')?.get()
 
       expect(xhrLogFromSecondaryOrigin).to.not.be.undefined
 
@@ -67,7 +71,7 @@ describe('cy.origin - snapshots', () => {
   },
   (done) => {
     cy.on('fail', () => {
-      const xhrLogFromSecondaryOrigin = findLog(logs, 'fetch', 'https://jsonplaceholder.cypress.io/todos/1')?.get()
+      const xhrLogFromSecondaryOrigin = findLog(logs, 'fetch', 'http://localhost:3500/foo.bar.baz.json')?.get()
 
       expect(xhrLogFromSecondaryOrigin).to.not.be.undefined
 
