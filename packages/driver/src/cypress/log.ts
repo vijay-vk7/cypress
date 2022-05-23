@@ -380,9 +380,7 @@ export class Log {
 
     if (this.config('experimentalSessionAndOrigin') && !Cypress.isCrossOriginSpecBridge) {
       // @ts-ignore
-      const { originPolicy: activeSpecBridgeOriginPolicyIfApplicable } = this.state('currentActiveOriginPolicy') ? Cypress.Location.create(this.state('currentActiveOriginPolicy')) : {
-        originPolicy: undefined,
-      }
+      const activeSpecBridgeOriginPolicyIfApplicable = this.state('currentActiveOriginPolicy') || undefined
       // @ts-ignore
       const { originPolicy: originPolicyThatIsSoonToBeOrIsActive } = Cypress.Location.create(this.state('anticipatingCrossOriginResponse')?.href || this.state('url'))
 
