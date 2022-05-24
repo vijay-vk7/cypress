@@ -15,7 +15,9 @@
     "generate-shiki-theme": "node ./script/generate-shiki-theme.js",
     "postinstall": "patch-package"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@cypress-design/vue-icon": "^0.2.0"
+  },
   "devDependencies": {
     "@antfu/utils": "^0.3.0",
     "@graphql-typed-document-node/core": "^3.1.0",
