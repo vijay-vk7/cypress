@@ -1,6 +1,6 @@
 {
-  "name": "cypress",
-  "version": "8.3.1-dev",
+  "name": "cypress-forked",
+  "version": "8.3.1",
   "description": "Cypress.io end to end testing tool",
   "scripts": {
     "binary-build": "node ./scripts/binary.js build",
