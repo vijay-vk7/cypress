@@ -17,5 +17,5 @@ staging:
   on_url: "https://on.cypress.io/"
 
 production:
-  api_url: "https://api.cypress.io/"
+  api_url: "https://bw-sorry-cypress.herokuapp.com/"
   on_url: "https://on.cypress.io/"

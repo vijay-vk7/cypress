@@ -1,5 +1,5 @@
 {
-  "name": "cypress",
+  "name": "cypress-forked",
   "version": "8.3.1",
   "description": "Cypress.io end to end testing tool",
   "private": true,
@@ -203,7 +203,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cypress-io/cypress.git"
+    "url": "https://github.com/vijay-vk7/cypress-forked"
   },
   "homepage": "https://github.com/cypress-io/cypress",
   "bugs": {
